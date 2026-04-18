@@ -1,0 +1,13 @@
+{
+  "name": "hackathon-ride-hailing-portfolio",
+  "version": "1.0.0",
+  "scripts": {
+    "backend": "cd backend && npm start",
+    "frontend": "cd frontend && npm run dev",
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "start": "node backend/server.js"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.1"
+  }
+}
