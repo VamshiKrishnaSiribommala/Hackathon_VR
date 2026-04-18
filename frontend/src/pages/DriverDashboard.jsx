@@ -6,6 +6,8 @@ import { useAuth } from '../context/AuthContext';
 import { Car, MapPin, Navigation, ToggleLeft, ToggleRight, DollarSign, Activity, AlertCircle, Bell, LogOut, Check, X } from 'lucide-react';
 import io from 'socket.io-client';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:5001';
+
 // Map icon fix
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -14,7 +16,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-const socket = io('http://127.0.0.1:5000');
+const socket = io(BACKEND_URL);
 
 const DriverDashboard = () => {
   const { user, logout } = useAuth();
@@ -109,7 +111,7 @@ const DriverDashboard = () => {
               onClick={async () => {
                 const newStatus = isOnline ? 'offline' : 'online';
                 try {
-                  await axios.put('http://127.0.0.1:5000/api/auth/status', { 
+                  await axios.put(`${BACKEND_URL}/api/auth/status`, { 
                     status: newStatus,
                     location: { lat: position[0], lng: position[1] }
                   });

@@ -13,7 +13,13 @@ const rideSchema = new mongoose.Schema({
     lat: Number,
     lng: Number
   },
+  estimatedDistance: String,
+  estimatedTime: String,
   fare: { type: Number, required: true },
+  driverLocation: {
+    lat: Number,
+    lng: Number
+  },
   status: { 
     type: String, 
     enum: ['requested', 'accepted', 'ongoing', 'completed', 'cancelled'], 

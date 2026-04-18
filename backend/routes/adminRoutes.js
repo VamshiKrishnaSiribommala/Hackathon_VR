@@ -32,7 +32,7 @@ router.get('/stats', authMiddleware, isAdmin, async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
     const pendingDrivers = await User.countDocuments({ role: 'driver', isApproved: false });
-    const activeRides = await Ride.countDocuments({ status: 'active' });
+    const activeRides = await Ride.countDocuments({ status: { $in: ['accepted', 'ongoing'] } });
     const completedRides = await Ride.find({ status: 'completed' });
     const revenue = completedRides.reduce((sum, r) => sum + r.fare, 0);
 

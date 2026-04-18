@@ -7,6 +7,8 @@ import { Car, Search, MapPin, Navigation, Send, Clock, DollarSign, History, LogO
 import io from 'socket.io-client';
 import axios from 'axios';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:5001';
+
 // Fix for default marker icons
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -15,7 +17,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-const socket = io('http://127.0.0.1:5000');
+const socket = io(BACKEND_URL);
 
 const RiderHome = () => {
   const { user, logout } = useAuth();
@@ -54,7 +56,7 @@ const RiderHome = () => {
     setRideStatus('searching');
     
     try {
-      const res = await axios.post('http://127.0.0.1:5000/api/ride/request', {
+      const res = await axios.post(`${BACKEND_URL}/api/ride/request`, {
         pickupLocation: { address: pickup, lat: position[0], lng: position[1] },
         dropLocation: { address: destination, lat: position[0] + 0.01, lng: position[1] + 0.01 },
         fare: estimate?.fare || 150

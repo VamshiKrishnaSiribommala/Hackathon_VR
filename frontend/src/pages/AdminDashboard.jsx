@@ -5,6 +5,8 @@ import axios from 'axios';
 import { MapContainer, TileLayer, CircleMarker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:5001';
+
 const AdminDashboard = () => {
   const { user, logout } = useAuth();
   const [users, setUsers] = useState([]);
@@ -17,10 +19,10 @@ const AdminDashboard = () => {
 
   const fetchData = async () => {
     try {
-      const usersRes = await axios.get('http://127.0.0.1:5000/api/admin/users');
+      const usersRes = await axios.get(`${BACKEND_URL}/api/admin/users`);
       setUsers(usersRes.data);
       
-      const statsRes = await axios.get('http://127.0.0.1:5000/api/admin/stats');
+      const statsRes = await axios.get(`${BACKEND_URL}/api/admin/stats`);
       setStats(statsRes.data);
       setLoading(false);
     } catch (err) {
@@ -30,7 +32,7 @@ const AdminDashboard = () => {
 
   const approveDriver = async (id) => {
     try {
-      await axios.put(`http://127.0.0.1:5000/api/admin/approve-driver/${id}`);
+      await axios.put(`${BACKEND_URL}/api/admin/approve-driver/${id}`);
       fetchData();
     } catch (err) {
       alert('Approval failed');

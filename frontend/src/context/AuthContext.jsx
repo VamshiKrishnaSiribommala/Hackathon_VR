@@ -1,6 +1,9 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:5001';
+axios.defaults.baseURL = BACKEND_URL;
+
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -11,7 +14,6 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      // In a real app, fetch user profile here
       const savedUser = JSON.parse(localStorage.getItem('user'));
       if (savedUser) setUser(savedUser);
     }
@@ -19,7 +21,7 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   const login = async (email, password) => {
-    const res = await axios.post('http://127.0.0.1:5000/api/auth/login', { email, password });
+    const res = await axios.post('/api/auth/login', { email, password });
     setToken(res.data.token);
     setUser(res.data.user);
     localStorage.setItem('token', res.data.token);
@@ -28,7 +30,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (userData) => {
-    const res = await axios.post('http://127.0.0.1:5000/api/auth/register', userData);
+    const res = await axios.post('/api/auth/register', userData);
     setToken(res.data.token);
     setUser(res.data.user);
     localStorage.setItem('token', res.data.token);
