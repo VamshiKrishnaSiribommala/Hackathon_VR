@@ -170,19 +170,61 @@ exports.getRideHistory = async (req, res) => {
   }
 };
 
+exports.cancelRide = async (req, res) => {
+  try {
+    const { rideId } = req.body;
+    const ride = await Ride.findById(rideId).populate('rider').populate('driver');
+    
+    if (!ride) return res.status(404).json({ error: 'Ride not found' });
+    
+    // Check authorization
+    if (ride.rider._id.toString() !== req.user.id && 
+        (!ride.driver || ride.driver._id.toString() !== req.user.id)) {
+      return res.status(403).json({ error: 'Not authorized to cancel this ride' });
+    }
+    
+    const cancelledBy = req.user.role;
+    ride.status = 'cancelled';
+    ride.cancelledBy = cancelledBy;
+    ride.cancelledAt = new Date();
+    await ride.save();
+    
+    // Update driver status if they were busy
+    if (ride.driver && ride.status === 'accepted') {
+      await User.findByIdAndUpdate(ride.driver._id, { status: 'online' });
+    }
+    
+    // Notify via socket
+    const io = req.app.get('io');
+    if (io) {
+      if (ride.rider) {
+        io.to(ride.rider._id.toString()).emit('rideCancelled', { rideId, cancelledBy });
+      }
+      if (ride.driver) {
+        io.to(ride.driver._id.toString()).emit('rideCancelled', { rideId, cancelledBy });
+      }
+    }
+    
+    res.json({ message: 'Ride cancelled successfully', ride });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.updateDriverLocation = async (req, res) => {
   try {
     if (req.user.role !== 'driver') {
       return res.status(403).json({ error: 'Only drivers can update location.' });
     }
 
-    const { rideId, driverLocation } = req.body;
-    const ride = await Ride.findById(rideId);
-    if (!ride) return res.status(404).json({ error: 'Ride not found' });
+    const { latitude, longitude } = req.body;
+    const driver = await User.findById(req.user.id);
+    if (!driver) return res.status(404).json({ error: 'Driver not found' });
 
-    ride.driverLocation = driverLocation;
-    await ride.save();
-    res.json({ message: 'Driver location updated', ride });
+    driver.location = { latitude, longitude };
+    await driver.save();
+
+    res.json({ message: 'Location updated successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
